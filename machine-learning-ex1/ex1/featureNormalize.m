@@ -31,9 +31,6 @@ sigma = std(X);
 
 X_norm = (X - mu) ./ sigma;
 
-% but x0 is always one
-X_norm(:, 1) = ones(size(X_norm , 1), 1);
-
 % ============================================================
 
 end
