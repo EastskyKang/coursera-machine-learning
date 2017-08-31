@@ -62,29 +62,61 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-% forward propagation 
+% -------------------------------------------------------------------------
+% forward-propagation 
+% -------------------------------------------------------------------------
+% note: implemented for row vectors (column vectors in the lecture)
+
 % layer1 (input layer)
-a1 = [ones(m, 1), X]; 
+a1 = [ones(m, 1), X];       % row vectors 
 
 % layer2 (hidden layer)
 z2 = a1 * Theta1';
 a2 = sigmoid(z2);
-a2 = [ones(m, 1), a2]; 
+a2 = [ones(m, 1), a2];      % row vectors 
 
-% layer3 (hidden layer)
+% layer3 (ouput layer)
 z3 = a2 * Theta2';
-a3 = sigmoid(z3);            % hypothesis
+a3 = sigmoid(z3);           % row vectors
+
+% hypothesis
+hx = a3;
 
 % one hot encoding for y
 y_oh = eye(max(y));
 y_oh = y_oh(y, :);
 
 % cost function y
-J = 1 / m * sum(sum(- y_oh .* log (a3) - (1 - y_oh) .* log (1 - a3)));
+J = 1 / m * sum(sum(- y_oh .* log (hx) - (1 - y_oh) .* log (1 - hx)));
 
+% -------------------------------------------------------------------------
+% back-propagation
+% -------------------------------------------------------------------------
+% note: implemented for row vectors (column vectors in the lecture)
+
+% layer3 (output layer)
+delta3 = a3 - y_oh;         
+
+% layer2 (hidden layer)
+delta2 = delta3 * Theta2(:, 2:end) .* sigmoidGradient(z2);
+Delta2 = delta3' * a2;
+
+% layer1 (input layer)
+Delta1 = delta2' * a1;
+
+% gradients
+Theta1_grad = 1/m * Delta1;
+Theta2_grad = 1/m * Delta2;
+
+% -------------------------------------------------------------------------
 % regularizer 
+% -------------------------------------------------------------------------
+
 J = J + lambda / (2 * m) * ...
     (sum(sum(Theta1(:, 2:end).^2)) + sum(sum(Theta2(:, 2:end).^2)));
+
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + lambda / m * Theta1(:, 2:end);
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + lambda / m * Theta2(:, 2:end);
 
 % -------------------------------------------------------------
 
